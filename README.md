@@ -1,73 +1,147 @@
-# Webhook Delivery System
+# 🚀 Webhook Delivery System
 
-## 📋 Overview
-
-This project implements a **reliable webhook delivery system** designed to safely receive, store, deliver, retry, and replay webhook events. It supports multiple integrations, asynchronous processing, failure tracking, and a simple frontend dashboard for visibility and control.
-
-The system ensures that:
-- ✅ Webhook events are **never lost**
-- ✅ Delivery is **non-blocking**
-- ✅ Failures are **observable and recoverable**
+> **A reliable, production-ready webhook delivery platform with persistence, retries, and observability**
 
 ---
 
-## ✨ Key Features
+## 📋 What This Does
 
-- 🔑 Integration (Mailbox) setup with API key authentication
-- 🔒 Secure webhook ingestion
-- ⚡ Asynchronous delivery to target URLs
-- 🔄 Automatic retries with exponential backoff
-- 📊 Persistent failure tracking
-- 🔃 Manual replay of failed events
-- 📱 Simple frontend dashboard for monitoring
+This project implements a **webhook delivery system** that guarantees:
+
+| Feature | Benefit |
+|---------|---------|
+| 🔑 **API Key Auth** | Secure integration setup |
+| 💾 **Event Persistence** | Zero data loss |
+| ⚡ **Async Processing** | Non-blocking ingestion |
+| 🔄 **Auto Retries** | Exponential backoff (2^attempt) |
+| 📊 **Failure Tracking** | Complete visibility |
+| 🔃 **Manual Replay** | Recover from failures |
+| 📱 **Live Dashboard** | Monitor all webhooks |
 
 ---
 
-## 🏗️ Architecture Overview
+## 🏗️ System Architecture
 
-The system follows a modular architecture with the following components:
-
-1. **Integration Setup (Mailbox)** - Create and manage webhook endpoints
-2. **Webhook Ingestion** - Receive and validate webhook events
-3. **Asynchronous Delivery** - Process events in the background
-4. **Retry & Failure Handling** - Automatic retry with exponential backoff
-5. **Event Listing & Details** - Query webhook history
-6. **Manual Replay** - Retry failed events
-7. **Frontend Visualization** - Dashboard for monitoring
+```
+┌─────────────────┐
+│  External       │
+│  System         │
+└────────┬────────┘
+         │ POST /webhooks/{id}
+         ▼
+┌─────────────────────────────┐
+│  FastAPI Backend            │
+│  ├─ Validate API Key        │
+│  ├─ Store Event (Immediate) │
+│  └─ Return Tracking Number  │
+└────────┬────────────────────┘
+         │
+    ┌────▼─────────────────┐
+    │ SQLite Database      │
+    │ • Webhooks          │
+    │ • Attempts          │
+    │ • Integrations      │
+    └──────────────────────┘
+         │
+    ┌────▼────────────────────┐
+    │ Async Delivery Task     │
+    │ ├─ Send to Target URL   │
+    │ ├─ Track Attempts       │
+    │ └─ Retry on Failure     │
+    └────┬─────────────────────┘
+         │
+    ┌────▼──────────────┐
+    │ Target URL        │
+    │ (External Webhook)│
+    └───────────────────┘
+```
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-|-----------|-----------|
-| **Backend** | FastAPI, SQLAlchemy, SQLite |
-| **Async Processing** | FastAPI Background Tasks |
-| **HTTP Client** | httpx |
-| **Frontend** | HTML, CSS, JavaScript |
-| **API Documentation** | Swagger (OpenAPI) |
+<table>
+<tr>
+<td><strong>Backend</strong></td>
+<td>FastAPI + SQLAlchemy + SQLite</td>
+</tr>
+<tr>
+<td><strong>Async</strong></td>
+<td>FastAPI Background Tasks</td>
+</tr>
+<tr>
+<td><strong>HTTP</strong></td>
+<td>httpx Client</td>
+</tr>
+<tr>
+<td><strong>Frontend</strong></td>
+<td>HTML5 + CSS3 + JavaScript</td>
+</tr>
+<tr>
+<td><strong>API Docs</strong></td>
+<td>Swagger/OpenAPI</td>
+</tr>
+</table>
 
 ---
 
-## 1️⃣ Integration Setup (Mailbox)
+## 📁 Project Structure
 
-Each integration is represented as a **Mailbox**, which serves as a destination for webhook events.
+```
+assignment/
+├── README.md                    # This file
+│
+├── backend/
+│   ├── main.py                 # FastAPI app & routes
+│   ├── database.py             # SQLite setup
+│   ├── models.py               # SQLAlchemy ORM models
+│   ├── delivery.py             # Async delivery logic
+│   ├── seed.py                 # Test data generator
+│   ├── requirements.txt         # Python dependencies
+│   └── __pycache__/            # Compiled files
+│
+└── frontend/
+    ├── index.html              # Dashboard UI
+    ├── app.js                  # Frontend logic
+    └── style.css               # Styling
+```
 
-### Mailbox Structure
+---
 
-A mailbox contains:
-- **Name** - Human-readable identifier
-- **Target URL** - Webhook destination
-- **API Key** - Secure authentication token (auto-generated)
+## 🚀 Getting Started
 
-### Create Mailbox
+### Backend Setup
 
-**Endpoint**
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+**Access:**
+- API: `http://localhost:8000`
+- Swagger UI: `http://localhost:8000/docs`
+
+### Frontend Setup
+
+```bash
+cd frontend
+python -m http.server 5500
+```
+
+**Access:** `http://localhost:5500`
+
+---
+
+## 📡 API Endpoints
+
+### 1️⃣ Create Integration (Mailbox)
+
 ```
 POST /api/mailboxes
 ```
 
-**Request**
+**Request:**
 ```json
 {
   "name": "Books Integration",
@@ -75,36 +149,30 @@ POST /api/mailboxes
 }
 ```
 
-**Response**
+**Response:**
 ```json
 {
-  "id": "<mailbox_id>",
-  "api_key": "<api_key>",
+  "id": "mailbox_id",
+  "api_key": "your-secret-api-key",
   "target_url": "https://webhook.site/..."
 }
 ```
 
-The `mailbox_id` and `api_key` are used for subsequent webhook authentication.
-
 ---
 
-## 2️⃣ Webhook Ingestion
+### 2️⃣ Send Webhook Event
 
-External systems send webhooks to a mailbox-specific endpoint for processing.
-
-### Ingestion Endpoint
-
-**Endpoint**
 ```
 POST /webhooks/{mailbox_id}
 ```
 
-**Headers**
+**Headers:**
 ```
-x-api-key: <api_key>
+x-api-key: <your-api-key>
+Content-Type: application/json
 ```
 
-**Request Body** (any valid JSON)
+**Request Body:**
 ```json
 {
   "event": "book.created",
@@ -116,184 +184,138 @@ x-api-key: <api_key>
 }
 ```
 
-### Ingestion Flow
-
-1. API key is validated against the mailbox
-2. Payload is stored immediately in the database
-3. A unique `tracking_number` is generated
-4. Response is returned instantly (non-blocking)
-5. Delivery is triggered asynchronously
-
-### Ingestion Response
-
+**Response:**
 ```json
 {
-  "tracking_number": "uuid-value"
+  "tracking_number": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
 ---
 
-## 3️⃣ Delivery and Retry
+### 3️⃣ List All Webhooks
 
-Webhook delivery is handled **asynchronously** to ensure fast ingestion and maximum reliability.
-
-### Delivery Logic
-
-- Payload is sent to the integration's target URL
-- Success is determined by HTTP **2xx** responses
-- Failures trigger automatic retries
-- Each delivery attempt is logged with timestamp and status
-
-### Retry Policy
-
-| Parameter | Value |
-|-----------|-------|
-| **Maximum Retries** | 3 |
-| **Backoff Strategy** | Exponential (2^attempt) |
-| **Persistence** | Each attempt is logged |
-| **Final State** | Marked as failed but retained |
-
-Each failed attempt is persisted with:
-- Timestamp
-- Status code / error message
-- Response body (if available)
-
-If all retries fail, the event is marked as **failed** but remains stored for manual replay.
-
----
-
-## 4️⃣ Event Listing and Details
-
-All webhook events are queryable through a comprehensive listing API.
-
-### List Webhooks Endpoint
-
-**Endpoint**
 ```
 GET /api/webhooks
 ```
 
-### Returned Information
-
-Each webhook event includes:
-- **Tracking Number** - Unique identifier
-- **Integration Name** - Associated mailbox name
-- **Target URL** - Delivery destination
-- **Payload** - Original webhook data
-- **Status** - `pending`, `delivered`, or `failed`
-- **Attempt Count** - Number of delivery attempts
-- **Created At** - Timestamp
-- **Last Attempt** - Timestamp of most recent attempt
-
-This endpoint efficiently joins event data with integration metadata and attempt history.
+**Returns:**
+```json
+[
+  {
+    "tracking_number": "550e8400...",
+    "mailbox_name": "Books Integration",
+    "target_url": "https://webhook.site/...",
+    "status": "delivered",
+    "attempt_count": 2,
+    "payload": {...},
+    "created_at": "2026-01-23T10:30:00",
+    "last_attempt_at": "2026-01-23T10:30:15"
+  }
+]
+```
 
 ---
 
-## 5️⃣ Replay Failed Events
+### 4️⃣ Retry Failed Webhook
 
-Failed webhook events can be manually retried to recover from transient failures.
-
-### Replay Endpoint
-
-**Endpoint**
 ```
 POST /api/webhooks/{tracking_number}/retry
 ```
 
-### Replay Flow
-
-1. Event status is reset to `pending`
-2. Retry counter is reset
-3. Asynchronous delivery is re-triggered
-4. Event follows the standard delivery and retry flow
-
-This behavior mirrors replaying messages from a **dead-letter queue** in production systems.
-
----
-
-## 6️⃣ Frontend Dashboard
-
-A simple yet effective frontend dashboard provides real-time visibility into webhook processing.
-
-### Dashboard Features
-
-- ✅ List all webhook events with filters
-- ✅ Display integration name and target URL
-- ✅ Show delivery attempts and current status
-- ✅ Retry failed events with a single click
-- ✅ View event payload details
-- ✅ Real-time status updates
-
-The frontend is intentionally minimal, with all business logic handled by the backend API.
-
----
-
-## 🚀 Running the Application
-
-### Backend Setup
-
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-**Access Swagger UI:**
-```
-http://localhost:8000/docs
-```
-
-### Frontend Setup
-
-```bash
-cd frontend
-python -m http.server 5500
-```
-
-**Open in browser:**
-```
-http://localhost:5500
+**Response:**
+```json
+{
+  "message": "Webhook retry initiated",
+  "tracking_number": "550e8400..."
+}
 ```
 
 ---
 
-## 💡 Key Design Decisions
+## ⚙️ Delivery Mechanism
 
-| Decision | Rationale |
-|----------|-----------|
-| **Persist before delivery** | Prevents data loss on processing failures |
-| **Asynchronous processing** | Avoids blocking webhook ingestion |
-| **Explicit failure states** | Enables observability and manual intervention |
-| **Backend data aggregation** | Simplifies frontend logic and reduces bandwidth |
-| **SQLite for persistence** | Simple deployment without external dependencies |
+| Stage | Action | Details |
+|-------|--------|---------|
+| **1. Ingestion** | Validate & Store | API key verified, payload saved immediately |
+| **2. Queue** | Background Task | Event added to async delivery queue |
+| **3. Delivery** | Send HTTP POST | Target URL called with webhook payload |
+| **4. Retry Logic** | Exponential Backoff | 2^attempt delay (1s, 2s, 4s...) |
+| **5. Max Attempts** | 3 retries | Total of 4 attempts (initial + 3 retries) |
+| **6. Final Status** | Success or Failure | Mark as `delivered` or `failed` |
+| **7. Persistence** | Store Attempts | All attempts logged for visibility |
+
+---
+
+## 📊 Status Lifecycle
+
+```
+┌─────────────┐
+│   pending   │  ◄── Initial state after ingestion
+└──────┬──────┘
+       │ Delivery attempt
+       ▼
+   ┌───────────┐
+   │ Success?  │
+   └───┬───┬───┘
+       │   │
+    YES│   │NO
+       │   └──────────┐
+       │              │ Retries left?
+       │              ▼
+       │          ┌────────┐
+       │          │ Retry? │
+       │          └───┬────┘
+       │          YES │  NO
+       │              │ (Max 3 retries)
+       │    ┌─────────┘
+       │    │
+       │    └──► pending (retry cycle)
+       │
+       ▼
+   ┌──────────────┐
+   │ delivered    │  OR   │ failed     │
+   └──────────────┘       └────────────┘
+```
+
+---
+
+## 💡 Key Design Principles
+
+| Principle | Implementation |
+|-----------|-----------------|
+| **Durability** | Events persisted in SQLite before delivery |
+| **Non-blocking** | Async background tasks for delivery |
+| **Observability** | All attempts tracked and queryable |
+| **Recoverability** | Manual replay of failed events |
+| **Simplicity** | Minimal dependencies, easy to understand |
 
 ---
 
 ## 🔮 Future Enhancements
 
-- 📦 Queue-based processing (Celery / Redis)
+- 📦 Queue-based delivery (Celery + Redis)
 - 💀 Dead-letter queue for permanent failures
-- 🛑 Rate limiting and circuit breakers
+- 🛑 Rate limiting & circuit breakers
 - ⚙️ Per-integration retry configuration
-- 🔐 Authentication and RBAC for dashboard
-- 📈 Webhook delivery metrics and analytics
+- 🔐 Authentication & RBAC for dashboard
+- 📈 Metrics & analytics dashboard
 - 🌐 Webhook signature verification (HMAC)
-- 📧 Failure notifications
+- 📧 Slack/email alerts for failures
 
 ---
 
-## 📌 Conclusion
+## 🎯 Conclusion
 
-This webhook system emphasizes:
-- **Durability** - No events are lost
-- **Observability** - Full visibility into delivery status
-- **Operational Control** - Manual replay and monitoring
+This webhook delivery system demonstrates a **production-ready pattern** for reliable event delivery. It prioritizes:
 
-It is designed to scale from a simple assignment setup to a production-ready architecture with minimal changes.
+✅ **Never losing events** - Persistent storage before delivery  
+✅ **Non-blocking ingestion** - Async processing keeps APIs fast  
+✅ **Full observability** - Every attempt is tracked and visible  
+✅ **Operational control** - Ability to replay failed events  
+
+The architecture scales from a simple assignment to a real-world production system with minimal changes.
 
 ---
 
-## 📄 License
-
-This project is provided as-is for educational purposes.
+**Built with ❤️ for reliable webhook delivery**
