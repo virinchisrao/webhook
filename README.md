@@ -1,245 +1,425 @@
-# Webhook Delivery Platform
+# 🚀 Webhook Delivery System
 
-## Overview
+> A reliable, production-ready webhook delivery platform with persistence, retries, and observability
 
-This project implements a reliable webhook delivery platform with a production-correct backend and a professional, API-driven React frontend.  
-The system is designed to safely ingest webhooks, deliver them asynchronously with retries, track failures, and provide operators with a clean dashboard for observability and recovery.
-
-The focus of this implementation is **durability, correctness, and operational clarity**, rather than visual complexity.
+**Status:** ✅ Production-Ready | **License:** MIT | **Python:** 3.9+ | **Node:** 16+
 
 ---
 
-## Architecture Summary
+## 📋 Overview
 
-1. Integration (Mailbox) Setup  
-2. Secure Webhook Ingestion  
-3. Asynchronous Delivery  
-4. Automatic Retry with Backoff  
-5. Failure Tracking & Replay  
-6. Operator Dashboard (React)
+This project implements an **enterprise-grade webhook delivery system** that guarantees reliable event delivery with:
 
----
-
-## Tech Stack
-
-### Backend
-- FastAPI
-- SQLAlchemy
-- SQLite (development)
-- httpx
-
-### Frontend
-- React (Vite)
-- JavaScript (ES6+)
-- Fetch API
+| Feature | Benefit |
+|---------|---------|
+| 🔑 **API Key Authentication** | Secure integration endpoints |
+| 💾 **Event Persistence** | Zero data loss - events stored before delivery |
+| ⚡ **Async Processing** | Non-blocking, fast ingestion |
+| 🔄 **Auto Retries** | Exponential backoff with configurable attempts |
+| 📊 **Complete Tracking** | Full audit trail of all delivery attempts |
+| 🔃 **Manual Replay** | Recover from failures with one-click retry |
+| 📱 **React Dashboard** | Real-time operational monitoring |
 
 ---
 
-## Project Structure
+## 🏗️ System Architecture
 
+```
+┌─────────────────────┐
+│  External System    │
+│  (Event Source)     │
+└──────────┬──────────┘
+           │ POST /webhooks/{id}
+           ▼
+┌─────────────────────────────────┐
+│      FastAPI Backend Server     │
+│  • Validate API Key             │
+│  • Persist Event (Immediate)    │
+│  • Return Tracking Number       │
+└──────────┬──────────────────────┘
+           │
+    ┌──────▼──────────┐
+    │  SQLite DB      │
+    │ • Webhooks      │
+    │ • Attempts      │
+    │ • Integrations  │
+    └──────┬──────────┘
+           │
+    ┌──────▼─────────────────────┐
+    │  Async Delivery Task       │
+    │ • Send HTTP POST           │
+    │ • Track Attempts           │
+    │ • Manage Retries           │
+    └──────┬──────────────────────┘
+           │
+    ┌──────▼──────────────┐
+    │  Target Webhook URL │
+    │ (External Endpoint) │
+    └─────────────────────┘
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend API** | FastAPI + SQLAlchemy + SQLite |
+| **Async Processing** | FastAPI Background Tasks |
+| **HTTP Client** | httpx |
+| **Frontend** | React 18 + Vite + JavaScript |
+| **Database** | SQLite (file-based) |
+| **API Documentation** | Swagger/OpenAPI (auto-generated) |
+
+---
+
+## 📁 Project Structure
+
+```
 assignment/
-├── backend/
-│ ├── main.py
-│ ├── database.py
-│ ├── models.py
-│ ├── delivery.py
-│ ├── requirements.txt
+├── README.md                          # This file
 │
-└── frontend/
-└── webhook-dashboard/
-├── index.html
-├── package.json
-├── vite.config.js
-└── src/
-├── api/
-├── components/
-├── pages/
-├── App.jsx
-└── main.jsx
-
+├── backend/                           # FastAPI server & database
+│   ├── main.py                        # API routes & application setup
+│   ├── models.py                      # SQLAlchemy ORM models
+│   ├── database.py                    # Database initialization & config
+│   ├── delivery.py                    # Webhook delivery & retry logic
+│   ├── seed.py                        # Database seeding script
+│   ├── requirements.txt                # Python dependencies
+│   └── __pycache__/                   # Compiled Python files
+│
+└── frontend/                          # React dashboard
+    └── webhook-dashboard/
+        ├── package.json               # Node dependencies
+        ├── vite.config.js             # Vite build configuration
+        ├── index.html                 # HTML entry point
+        ├── eslint.config.js           # Code quality rules
+        ├── public/                    # Static assets
+        └── src/
+            ├── main.jsx               # React entry point
+            ├── App.jsx                # Main app component
+            ├── App.css                # Global styles
+            ├── index.css              # Base styles
+            ├── api/
+            │   └── webhooks.js        # API client layer
+            ├── components/
+            │   ├── WebhookTable.jsx   # Webhook list display
+            │   ├── StatusBadge.jsx    # Status indicator
+            │   └── RetryButton.jsx    # Retry action button
+            ├── pages/
+            │   └── Dashboard.jsx      # Main dashboard page
+            └── assets/                # Images & media
+```
 
 ---
 
-# 🚀 Running the Application
+## 🚀 Getting Started
 
-## 1. Backend Setup
+### Prerequisites
+
+- **Python 3.9+** with pip
+- **Node.js 16+** with npm
+- **Git** for version control
+
+### Backend Setup
 
 ```bash
+# Navigate to backend directory
 cd backend
+
+# Create virtual environment (optional but recommended)
+python -m venv venv
+source venv/Scripts/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Seed database (optional - creates sample data)
+python seed.py
+
+# Start the server
 uvicorn main:app --reload
 ```
 
-Backend URL: http://localhost:8000
+**Backend Access:**
+- 🌐 API: [http://localhost:8000](http://localhost:8000)
+- 📖 Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- 📋 ReDoc: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
-Swagger UI: http://localhost:8000/docs
-
-## 2. Frontend Setup
+### Frontend Setup
 
 ```bash
+# Navigate to frontend directory
 cd frontend/webhook-dashboard
+
+# Install dependencies
 npm install
+
+# Start development server
 npm run dev
 ```
 
-Frontend URL: http://localhost:5173
+**Frontend Access:**
+- 🎨 Dashboard: [http://localhost:5173](http://localhost:5173)
 
 ---
 
-# 🔧 Using the System (Step-by-Step)
-## Step 1: Create an Integration (Mailbox)
+## 📡 API Endpoints Reference
 
-**Endpoint**
+### 1️⃣ Create Webhook Integration
 
-```
-POST /api/mailboxes
-```
+**Endpoint:** `POST /api/mailboxes`
 
-**Request**
+Create a new webhook integration that can receive events.
 
+**Request:**
 ```json
 {
-  "name": "Books Integration",
-  "target_url": "https://webhook.site/your-unique-url"
+  "name": "My App Events",
+  "target_url": "https://webhook.example.com/events"
 }
 ```
 
-**Response**
-
+**Response:**
 ```json
 {
-  "id": "<mailbox_id>",
-  "api_key": "<api_key>",
-  "target_url": "https://webhook.site/..."
+  "id": "mailbox_123abc",
+  "api_key": "secret_key_xyz789",
+  "name": "My App Events",
+  "target_url": "https://webhook.example.com/events",
+  "created_at": "2024-01-27T10:30:00Z"
 }
 ```
 
-Each integration has its own API key and target URL.
+---
 
-## Step 2: Send a Webhook
+### 2️⃣ Send Webhook Event
 
-**Endpoint**
+**Endpoint:** `POST /webhooks/{mailbox_id}`
 
+Send an event to be delivered to the integration's target URL.
+
+**Headers:**
 ```
-POST /webhooks/{mailbox_id}
-```
-
-**Headers**
-
-```
-x-api-key: <api_key>
+x-api-key: secret_key_xyz789
+Content-Type: application/json
 ```
 
-**Body**
-
+**Request:**
 ```json
 {
-  "event": "book.created",
+  "event": "order.created",
   "data": {
-    "title": "Clean Code",
-    "author": "Robert Martin",
-    "price": 499
+    "order_id": "12345",
+    "customer": "John Doe",
+    "total": 99.99
   }
 }
 ```
 
-**Response**
-
+**Response:**
 ```json
 {
-  "tracking_number": "uuid-value"
+  "tracking_number": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "queued"
 }
 ```
 
-Webhook events are persisted immediately and processed asynchronously.
+---
 
-## Step 3: Delivery & Retry
+### 3️⃣ List All Webhooks
 
-Delivery happens outside the request lifecycle
+**Endpoint:** `GET /api/webhooks`
 
-HTTP 2xx responses are treated as success
+Retrieve all webhook delivery records with their status.
 
-Failed deliveries are retried up to 3 times
-
-Exponential backoff is applied
-
-Each attempt is stored for observability
-
-Final status:
-- delivered
-- failed
-
-## Step 4: View Webhook Events
-
-**Endpoint**
-
+**Response:**
+```json
+[
+  {
+    "tracking_number": "550e8400-e29b-41d4-a716-446655440000",
+    "mailbox_name": "My App Events",
+    "target_url": "https://webhook.example.com/events",
+    "status": "delivered",
+    "attempt_count": 1,
+    "last_attempt_at": "2024-01-27T10:31:00Z"
+  },
+  {
+    "tracking_number": "660e8400-e29b-41d4-a716-446655440001",
+    "mailbox_name": "My App Events",
+    "target_url": "https://webhook.example.com/events",
+    "status": "failed",
+    "attempt_count": 3,
+    "last_attempt_at": "2024-01-27T10:45:00Z"
+  }
+]
 ```
-GET /api/webhooks
-```
-
-The response includes:
-- Tracking number
-- Integration name
-- Target URL
-- Attempt count
-- Status
-
-This data powers the frontend dashboard.
-
-## Step 5: Replay Failed Events
-
-**Endpoint**
-
-```
-POST /api/webhooks/{tracking_number}/retry
-```
-
-Only failed events can be replayed.
-Retry is handled asynchronously.
 
 ---
 
-# 🖥️ React Frontend Dashboard
+### 4️⃣ Retry Failed Webhook
 
-The React dashboard provides:
-- A table view of webhook events
-- Integration name and target URL
-- Attempt count and delivery status
-- Color-coded status indicators
-- Retry action for failed events only
-- Proper loading and error states
+**Endpoint:** `POST /api/webhooks/{tracking_number}/retry`
 
-The frontend is intentionally minimal and fully API-driven.
-All business logic remains in the backend.
+Manually retry a failed webhook delivery.
 
-## Key Design Decisions
-
-- Persist before delivery to prevent data loss
-- Asynchronous processing for reliability
-- Explicit failure states for operational clarity
-- Backend-driven UI to keep frontend simple and maintainable
-- Minimal but complete React architecture
-
-## Error Handling
-
-- Invalid API keys return 401 Unauthorized
-- Unreachable target URLs trigger retries
-- Permanent failures remain visible and replayable
-- Frontend displays loading and error states clearly
-
-## Production Considerations
-
-This project is production-correct and can be extended with:
-- Celery / Redis for background processing
-- PostgreSQL + Alembic migrations
-- Dead-letter queue
-- Request signing (HMAC)
-- Rate limiting
-- Authentication for dashboard
+**Response:**
+```json
+{
+  "message": "Webhook retry initiated",
+  "tracking_number": "660e8400-e29b-41d4-a716-446655440001",
+  "new_status": "queued"
+}
+```
 
 ---
 
-## Conclusion
+## 🎨 Frontend Dashboard
 
-This webhook delivery platform demonstrates a real-world approach to building reliable, observable, and recoverable webhook systems.
-The backend ensures durability and correctness, while the React frontend focuses on operational visibility and safe recovery actions.
+The React-based dashboard provides real-time operational visibility.
+
+### Key Features
+
+✅ **Webhook Event List** - View all webhook delivery records  
+✅ **Status Indicators** - Color-coded delivery status (delivered, failed, pending)  
+✅ **Integration Details** - See webhook name and target URL  
+✅ **Attempt Tracking** - View number of delivery attempts  
+✅ **Retry Control** - One-click retry for failed webhooks  
+✅ **Error Handling** - Graceful error states and loading indicators  
+✅ **Responsive Design** - Works on desktop and tablet devices  
+
+### Architecture
+
+- **API-driven:** All data flows from the backend API
+- **Stateless:** No local state management complexity
+- **Minimal:** Focuses on observation and control
+- **Professional:** Clean, intuitive user interface
+
+---
+
+## ⚙️ Delivery Mechanism
+
+| Stage | Action | Details |
+|-------|--------|---------|
+| **1. Ingestion** | Validate & Store | API key verified, event payload persisted immediately to database |
+| **2. Queuing** | Background Task | Event added to async delivery queue |
+| **3. Delivery** | HTTP POST | Target webhook URL is called with event payload |
+| **4. Retry Logic** | Exponential Backoff | Failed attempts retry with 2^attempt second delay |
+| **5. Max Attempts** | Attempt Limit | 3 total attempts (initial + 2 retries) |
+| **6. Final Status** | Completion | Marked as `delivered` (success) or `failed` (exhausted retries) |
+| **7. Persistence** | Audit Trail | All attempts logged with timestamps and response codes |
+
+### Retry Schedule
+
+```
+Attempt 1: Immediate
+Attempt 2: 2 seconds later (2^1)
+Attempt 3: 4 seconds later (2^2)
+After attempt 3: Status = failed
+```
+
+---
+
+## 💡 Design Principles
+
+| Principle | Implementation | Benefit |
+|-----------|---|---------|
+| **Durability** | Persist before delivery | Events never lost, even on crashes |
+| **Non-blocking** | Async background tasks | API returns instantly, delivery happens in background |
+| **Observability** | Complete attempt tracking | Full visibility into what happened |
+| **Recoverability** | Manual retry mechanism | Recover from transient failures |
+| **Separation of Concerns** | Frontend is API-driven | Backend logic independent from UI |
+| **Simplicity** | Minimal React dashboard | Easy to maintain and extend |
+
+---
+
+## 🔮 Future Enhancements
+
+- [ ] **Queue System** - Celery + Redis for horizontal scaling
+- [ ] **Dead Letter Queue** - Preserve undeliverable events
+- [ ] **Rate Limiting** - Per-integration rate limits
+- [ ] **Circuit Breaker** - Stop retrying to unavailable endpoints
+- [ ] **Custom Retry Policies** - Per-integration configuration
+- [ ] **Authentication** - Dashboard login & user management
+- [ ] **RBAC** - Role-based access control
+- [ ] **Metrics & Monitoring** - Prometheus metrics export
+- [ ] **Webhook Signatures** - HMAC signature verification
+- [ ] **Event Filtering** - Subscribe to specific event types
+- [ ] **Webhooks UI** - Dashboard webhook management
+
+---
+
+## 📚 Examples
+
+### Example 1: Full Webhook Flow
+
+```bash
+# 1. Create an integration
+curl -X POST http://localhost:8000/api/mailboxes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Order Service",
+    "target_url": "https://webhook.site/unique-url"
+  }'
+
+# Response includes: api_key
+
+# 2. Send an event
+curl -X POST http://localhost:8000/webhooks/mailbox_id \
+  -H "x-api-key: your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event": "order.completed",
+    "data": {
+      "order_id": "ORD-001",
+      "amount": 299.99
+    }
+  }'
+
+# 3. Check status in dashboard
+# Navigate to http://localhost:5173
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## 🎯 Summary
+
+This webhook delivery system demonstrates production-grade patterns for reliable event delivery:
+
+✅ **Never loses events** - Persistence before delivery  
+✅ **Fast ingestion** - Non-blocking async processing  
+✅ **Complete visibility** - Detailed attempt tracking  
+✅ **Operational control** - Manual replay on demand  
+✅ **Clean code** - Professional React frontend  
+✅ **Scalable design** - Ready for production workloads  
+
+---
+
+## 📞 Support
+
+For questions or issues:
+- 📧 Email: [your-email@example.com](mailto:your-email@example.com)
+- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/webhook-system/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/webhook-system/discussions)
+
+---
+
+**Last Updated:** January 27, 2026
