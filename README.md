@@ -382,23 +382,67 @@ curl -X POST http://localhost:8000/webhooks/mailbox_id \
 
 ---
 
-## 🤝 Contributing
+## 🐳 Docker Deployment
 
-Contributions are welcome! Please:
+This project can be deployed using Docker and Docker Compose to run both the React frontend and FastAPI backend together in a production-like environment.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Prerequisites
 
----
+- Docker
+- Docker Compose (v2+)
+- Git
 
-## 📝 License
+### Deployment Steps
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+1. **Clone the repository**
 
----
+```bash
+git clone https://github.com/<your-username>/<your-repo>.git
+cd assignment
+```
+
+2. **Build and start the containers**
+
+```bash
+docker compose up -d --build
+```
+
+This will:
+- Build the FastAPI backend container
+- Build the React frontend container
+- Start both services in the same Docker network
+
+### Service Access
+
+| Service | URL |
+|---------|-----|
+| Frontend (React Dashboard) | http://<server-ip>:3000 |
+| Backend API | http://<server-ip>:8000 |
+| Swagger Docs | http://<server-ip>:8000/docs |
+
+### Container Networking
+
+- The frontend is served via Nginx
+- API requests from the frontend are proxied to the backend using Docker service names
+- No hardcoded localhost calls are used inside containers
+- This setup avoids CORS issues and mirrors real production deployments
+
+### Data Persistence
+
+- SQLite data is stored using a Docker volume
+- Webhook events and delivery attempts are preserved across container restarts
+
+### Stopping the Application
+
+```bash
+docker compose down
+```
+
+To remove volumes as well:
+
+```bash
+docker compose down -v
+```
 
 ## 🎯 Summary
 
