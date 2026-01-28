@@ -397,8 +397,8 @@ This project can be deployed using Docker and Docker Compose to run both the Rea
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/<your-username>/<your-repo>.git
-cd assignment
+git clone https://github.com/virinchisrao/webhook
+cd webhook
 ```
 
 2. **Build and start the containers**
@@ -454,15 +454,6 @@ This webhook delivery system demonstrates production-grade patterns for reliable
 ✅ **Operational control** - Manual replay on demand  
 ✅ **Clean code** - Professional React frontend  
 ✅ **Scalable design** - Ready for production workloads  
-
----
-
-## 📞 Support
-
-For questions or issues:
-- 📧 Email: [your-email@example.com](mailto:your-email@example.com)
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/webhook-system/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/webhook-system/discussions)
 
 ---
 
