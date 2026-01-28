@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: webhook-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db_data:/app
+    restart: always
+
+  frontend:
+    build: ./frontend/webhook-dashboard
+    container_name: webhook-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  db_data:
